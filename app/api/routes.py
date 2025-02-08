@@ -17,27 +17,27 @@ class QueryAPI(Resource):
         }
 
 from app.utils.llama_processor import LlamaProcessor
-from app.models import RawPage, PageVectorIndex
-import json
+from app.utils.htmlparser import HTMLParser
+from app.models import RawPage, PageVectorIndex, SessionLocal
 
 class IngestionAPI(Resource):
     def __init__(self):
         self.llama_processor = LlamaProcessor()
+        self.html_parser = HTMLParser()
 
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('url', type=str, required=True, help='URL is required')
         parser.add_argument('owner', type=str, required=True, help='Owner is required')
         args = parser.parse_args()
+        print(args)
         
         try:
-            # 下载和解析网页内容
-            response = requests.get(args['url'], timeout=10)
-            response.raise_for_status()
-            raw_content = response.text
-            
-            soup = BeautifulSoup(raw_content, 'html.parser')
-            content = ' '.join([text for text in soup.stripped_strings])
+            # 使用 HTMLParser 获取和解析内容
+            raw_content, content = self.html_parser.fetch_and_parse(args['url'])
+
+            # output content to console
+            print(args['url'], content)
             
             db = SessionLocal()
             
@@ -50,7 +50,7 @@ class IngestionAPI(Resource):
                 status=0
             )
             db.add(raw_page)
-            db.flush()  # 获取 raw_page.id
+            db.flush()
             
             # 处理并保存向量索引
             processed_chunks = self.llama_processor.process_content(
@@ -64,7 +64,7 @@ class IngestionAPI(Resource):
                     chunk_index=chunk['chunk_index'],
                     chunk_text=chunk['chunk_text'],
                     embedding=chunk['embedding'],
-                    metadata=chunk['metadata']
+                    meta_info=chunk['meta_info']
                 )
                 db.add(vector_index)
             
@@ -82,6 +82,8 @@ class IngestionAPI(Resource):
             }, 201
             
         except Exception as e:
+            if 'db' in locals():
+                db.close()
             return {
                 'status': 'error',
                 'message': f'Error: {str(e)}'

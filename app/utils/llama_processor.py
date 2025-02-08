@@ -1,7 +1,7 @@
 from llama_index.core import Document
 from llama_index.core.node_parser import SimpleNodeParser
-from llama_index.embeddings.openai import OpenAIEmbedding
-from app.config import Config
+from app.utils.embedding_factory import get_embedding_model
+from app.config import Config 
 import json
 
 class LlamaProcessor:
@@ -10,7 +10,7 @@ class LlamaProcessor:
             chunk_size=Config.CHUNK_SIZE,
             chunk_overlap=Config.CHUNK_OVERLAP
         )
-        self.embed_model = OpenAIEmbedding(api_key=Config.OPENAI_API_KEY)
+        self.embed_model = get_embedding_model()
     
     def process_content(self, content, metadata=None):
         # 创建文档对象
@@ -25,12 +25,15 @@ class LlamaProcessor:
             text = node.get_content()
             embedding = self.embed_model.get_text_embedding(text)
             
+            # 确保 metadata 不为 None
+            meta = metadata or {}
+            
             results.append({
                 'chunk_index': idx,
                 'chunk_text': text,
                 'embedding': embedding,
-                'meta_info': json.dumps({    # 改名从 metadata 到 meta_info
-                    'source': metadata.get('url', ''),
+                'meta_info': json.dumps({
+                    'source': meta.get('url', ''),
                     'chunk_size': len(text),
                     'position': idx
                 })

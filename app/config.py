@@ -26,8 +26,15 @@ class Config:
     def get_database_url(cls):
         return f"postgresql://{cls.POSTGRES_USER}:{cls.POSTGRES_PASSWORD}@{cls.POSTGRES_HOST}:{cls.POSTGRES_PORT}/{cls.POSTGRES_DB}"
 
+    # 模型配置
+    EMBEDDING_MODEL = os.getenv('EMBEDDING_MODEL', 'qwen')
+    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+    DASHSCOPE_API_KEY = os.getenv('DASHSCOPE_API_KEY')
+
     @classmethod
     def validate(cls):
         """验证必需的配置项"""
-        if not cls.OPENAI_API_KEY:
-            raise ValueError("OPENAI_API_KEY is required")
+        if cls.EMBEDDING_MODEL == 'openai' and not cls.OPENAI_API_KEY:
+            raise ValueError("OPENAI_API_KEY is required when using OpenAI model")
+        elif cls.EMBEDDING_MODEL == 'qwen' and not cls.DASHSCOPE_API_KEY:
+            raise ValueError("DASHSCOPE_API_KEY is required when using Qwen model")

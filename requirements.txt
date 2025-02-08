@@ -9,3 +9,4 @@ SQLAlchemy==2.0.23
 requests==2.31.0
 beautifulsoup4==4.12.2
 openai==1.52.0
+dashscope==1.14.0
