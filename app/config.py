@@ -19,7 +19,7 @@ class Config:
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
     # LlamaIndex 配置
-    CHUNK_SIZE = 1024
+    CHUNK_SIZE = 800
     CHUNK_OVERLAP = 50
 
     @classmethod

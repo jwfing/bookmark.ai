@@ -23,7 +23,13 @@ class LlamaProcessor:
         results = []
         for idx, node in enumerate(nodes):
             text = node.get_content()
-            embedding = self.embed_model.get_text_embedding(text)
+            embedding_result = self.embed_model.get_text_embedding(text)
+            
+            # 从 numpy.ndarray 转换为 Python 字典
+            embedding_dict = embedding_result.item()
+            
+            # 获取向量数据
+            embedding_vector = embedding_dict['embedding']
             
             # 确保 metadata 不为 None
             meta = metadata or {}
@@ -31,7 +37,7 @@ class LlamaProcessor:
             results.append({
                 'chunk_index': idx,
                 'chunk_text': text,
-                'embedding': embedding,
+                'embedding': embedding_vector,
                 'meta_info': json.dumps({
                     'source': meta.get('url', ''),
                     'chunk_size': len(text),

@@ -59,11 +59,16 @@ class IngestionAPI(Resource):
             )
             
             for chunk in processed_chunks:
+                # Convert embedding to flat list and ensure it's 1536 dimensions
+                embedding_array = chunk['embedding'].flatten().tolist() if hasattr(chunk['embedding'], 'flatten') else chunk['embedding']
+                if len(embedding_array) != 1536:
+                    raise ValueError(f"Expected 1536 dimensions, got {len(embedding_array)}")
+                
                 vector_index = PageVectorIndex(
                     page_id=raw_page.id,
                     chunk_index=chunk['chunk_index'],
                     chunk_text=chunk['chunk_text'],
-                    embedding=chunk['embedding'],
+                    embedding=embedding_array,
                     meta_info=chunk['meta_info']
                 )
                 db.add(vector_index)
