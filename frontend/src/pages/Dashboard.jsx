@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { Send as SendIcon, Logout as LogoutIcon } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
-import axios from 'axios';
+import axios from '../utils/axios';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ const Dashboard = () => {
 
   const fetchBookmarks = async () => {
     try {
-      const response = await axios.get('/api/pages');
+      const response = await axios.get('/pages');
       setBookmarks(response.data);
     } catch (error) {
       console.error('Error fetching bookmarks:', error);
@@ -45,7 +45,7 @@ const Dashboard = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post('/api/search', { query: searchQuery });
+      const response = await axios.post('/search', { query: searchQuery });
       setChatHistory([
         ...chatHistory,
         { type: 'user', content: searchQuery },

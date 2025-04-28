@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../utils/axios';
 
 const AuthContext = createContext(null);
 
@@ -14,19 +14,17 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     if (token) {
       // Verify token and set user
-      axios.get('/api/verify', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      .then(response => {
-        setUser(response.data);
-        setIsAuthenticated(true);
-      })
-      .catch(() => {
-        localStorage.removeItem('token');
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      axios.get('/verify')
+        .then(response => {
+          setUser(response.data);
+          setIsAuthenticated(true);
+        })
+        .catch(() => {
+          localStorage.removeItem('token');
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     } else {
       setLoading(false);
     }
@@ -34,7 +32,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('/api/signin', { email, password });
+      const response = await axios.post('/signin', { email, password }, { withCredentials: true });
       const { token, user } = response.data;
       localStorage.setItem('token', token);
       setUser(user);
@@ -47,7 +45,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (email, password) => {
     try {
-      const response = await axios.post('/api/signup', { email, password });
+      const response = await axios.post('/signup', { email, password });
       const { token, user } = response.data;
       localStorage.setItem('token', token);
       setUser(user);
