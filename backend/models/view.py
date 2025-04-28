@@ -9,6 +9,9 @@ class UserAuth(BaseModel):
 class SearchQuery(BaseModel):
     query: str
 
+class PageIndexing(BaseModel):
+    url: str
+
 class LoginForm(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None
